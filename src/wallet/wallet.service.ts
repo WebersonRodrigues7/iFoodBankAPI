@@ -1,21 +1,56 @@
-import { Injectable } from '@nestjs/common';
-import { CreateWalletDto } from './dto/create-wallet.dto';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
+import { usersTable, walletTable } from 'drizzle/schema';
+import { type Database } from 'src/db/database';
 
 @Injectable()
 export class WalletService {
-  create(createWalletDto: CreateWalletDto) {
-    return 'This action adds a new wallet';
+  constructor(@Inject('Drizzle') private readonly db: Database) {}
+
+  async createWallet(userId: number) {
+    try {
+      if (!userId) throw new NotFoundException();
+      const [findWallet] = await this.db
+        .select()
+        .from(walletTable)
+        .where(eq(walletTable.userId, userId));
+
+      if (findWallet) return findWallet;
+
+      const newWallet = await this.db.insert(walletTable).values({
+        userId: userId,
+        amount: 0,
+      });
+
+      return newWallet;
+    } catch (err) {
+      console.log('Deu erro aqui' + err);
+    }
   }
 
-  findAll() {
-    return `This action returns all wallet`;
+  async deposit(userId: number, amount: number) {
+    if (!userId) throw new NotFoundException();
+
+    const [findWallet] = await this.db
+      .select()
+      .from(walletTable)
+      .where(eq(walletTable.userId, userId));
+
+    if (!findWallet) throw new NotFoundException();
+    console.log(amount);
+    console.log(findWallet.amount);
+    const [updtWallet] = await this.db
+      .update(walletTable)
+      .set({
+        amount: findWallet.amount + Number(amount),
+      })
+      .where(eq(walletTable.userId, userId))
+      .returning();
+
+    console.log(updtWallet);
+
+    return updtWallet;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} wallet`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} wallet`;
-  }
+  async pix(payerId, payeeId, amount) {}
 }

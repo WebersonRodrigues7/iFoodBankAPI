@@ -1,13 +1,17 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "70560fc3-215a-44e1-b342-56d88b0946b9",
+  "id": "69388d28-222b-4d3d-9ebe-702709a5e94d",
   "prevIds": [
-    "76f9ea82-5052-4404-b50f-d87578ef95f2"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
       "name": "users_table",
+      "entityType": "tables"
+    },
+    {
+      "name": "wallet_table",
       "entityType": "tables"
     },
     {
@@ -61,12 +65,76 @@
       "table": "users_table"
     },
     {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "false",
+      "generated": null,
+      "name": "email_verificado",
+      "entityType": "columns",
+      "table": "users_table"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": true,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "wallet_table"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "amount",
+      "entityType": "columns",
+      "table": "wallet_table"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "userId",
+      "entityType": "columns",
+      "table": "wallet_table"
+    },
+    {
+      "columns": [
+        "userId"
+      ],
+      "tableTo": "users_table",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "nameExplicit": false,
+      "name": "fk_wallet_table_userId_users_table_id_fk",
+      "entityType": "fks",
+      "table": "wallet_table"
+    },
+    {
       "columns": [
         "id"
       ],
       "nameExplicit": false,
       "name": "users_table_pk",
       "table": "users_table",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "wallet_table_pk",
+      "table": "wallet_table",
       "entityType": "pks"
     },
     {
@@ -86,6 +154,15 @@
       "name": "users_table_email_unique",
       "entityType": "uniques",
       "table": "users_table"
+    },
+    {
+      "columns": [
+        "userId"
+      ],
+      "nameExplicit": false,
+      "name": "wallet_table_userId_unique",
+      "entityType": "uniques",
+      "table": "wallet_table"
     }
   ],
   "renames": []

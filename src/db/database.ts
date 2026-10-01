@@ -1,12 +1,16 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { relation } from "./schema";
+import Database from 'libsql';
+import { drizzle } from 'drizzle-orm/libsql';
+import { relations } from './schema';
+import { createClient } from '@libsql/client';
 
-
-
-const sqlite = new Database("local.db");
+const client = createClient({
+  url: 'file:local.db',
+});
 
 export const db = drizzle({
-    client: sqlite,
-    relations: relation
+  client,
+  relations: relations,
 });
+
+
+export type Database = typeof db;

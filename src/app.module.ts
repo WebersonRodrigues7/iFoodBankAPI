@@ -14,6 +14,8 @@ import { AuthenticationModule } from '@nestjs/authentication';
 import { join } from 'node:path';
 import { ConfigModule } from "@nestjs/config"
 import { WalletModule } from './wallet/wallet.module';
+import { TransfersModule } from './transfers/transfers.module';
+import { PiggyModule } from './piggy/piggy.module';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { WalletModule } from './wallet/wallet.module';
     DatabaseModule,
     AuthModule,
     WalletModule,
+    TransfersModule,
+    PiggyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

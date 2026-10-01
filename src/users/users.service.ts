@@ -1,21 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { usersTable } from 'src/db/schema';
 import { eq } from 'drizzle-orm';
+import { type Database } from 'src/db/database';
 
 @Injectable()
 export class UsersService {
-  constructor(@Inject('Drizzle') private readonly db: BetterSQLite3Database) {}
+  constructor(@Inject('Drizzle') private readonly db: Database) {}
 
   async deleteUser(id: number) {
     const [user] = await this.db
       .delete(usersTable)
       .where(eq(usersTable.id, id))
       .returning({ deletedUser: usersTable.cpf });
+
+      await this.db.query
     return user;
   }
 
-  async markVerifiedEmail(id: number, email: string): Promise<boolean> {
+  async markVerifiedEmail(id: number, email: string) {
     const [user] = await this.db
       .select()
       .from(usersTable)

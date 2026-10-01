@@ -4,14 +4,14 @@ import {
   type SessionRecord,
 } from '@nestjs/authentication';
 import { type User, usersTable } from '../db/schema.js';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { eq } from 'drizzle-orm';
 import { Inject, Injectable } from '@nestjs/common';
+import { type Database } from 'src/db/database.js';
 
 @Injectable()
 export class SessionAuth extends SessionCookieProvider<User> {
   constructor(
-    @Inject('Drizzle') private readonly db: BetterSQLite3Database,
+    @Inject('Drizzle') private readonly db: Database,
     registry: AuthenticationRegistry,
   ) {
     super();
@@ -24,6 +24,7 @@ export class SessionAuth extends SessionCookieProvider<User> {
       .select()
       .from(usersTable)
       .where(eq(usersTable.id, Number(session.userId)));
+      
     return findUser;
   }
 }

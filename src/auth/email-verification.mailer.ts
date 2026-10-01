@@ -5,10 +5,10 @@ import {
   type EmailVerificationLink,
 } from '@nestjs/authentication';
 import { Mailer, type Mailable } from '@nestjs/mail';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { usersTable } from 'drizzle/schema';
 import { and, eq } from 'drizzle-orm';
 import { UsersService } from 'src/users/users.service';
+import { type Database } from 'src/db/database';
 
 @Injectable()
 export class VerifyEmailMail implements Mailable<EmailVerificationLink> {
@@ -24,7 +24,7 @@ export class VerifyEmailMail implements Mailable<EmailVerificationLink> {
 @Injectable()
 export class EmailVerificationMailer extends EmailVerificationHandler {
   constructor(
-    @Inject('Drizzle') private readonly db: BetterSQLite3Database,
+    @Inject('Drizzle') private readonly db: Database,
     private readonly usersService: UsersService,
     private readonly mailer: Mailer,
     registry: AuthenticationRegistry,

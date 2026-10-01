@@ -5,16 +5,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { PasswordHasher } from '@nestjs/authentication';
 import { usersTable } from 'src/db/schema';
 import { SignInDto, SignUpDto } from './dto/auth.dto';
 import { eq } from 'drizzle-orm';
+import { type Database } from 'src/db/database';
 
 @Injectable()
 export class CredentialsService {
   constructor(
-    @Inject('Drizzle') private readonly db: BetterSQLite3Database,
+    @Inject('Drizzle') private readonly db: Database,
     private readonly passwordHasher: PasswordHasher,
   ) {}
 
@@ -26,6 +26,7 @@ export class CredentialsService {
       .select()
       .from(usersTable)
       .where(eq(usersTable.cpf, body.cpf));
+      
     if (findUser) {
       throw new ConflictException('Email já existe!');
     }
@@ -67,5 +68,15 @@ export class CredentialsService {
     }
 
     return foundUser;
+  }
+
+  async resend(userEmail: string) {
+    const user = await this.db.query.usersTable.findFirst({
+      where: { email: userEmail }
+    })
+  
+    if (!user) throw new NotFoundException('Enviamos um email!');
+    
+    return user;
   }
 }

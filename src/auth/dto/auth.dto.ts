@@ -7,6 +7,7 @@ import {
 } from 'class-validator';
 
 export class SignUpDto {
+
   @IsNotEmpty()
   @IsString()
   @MinLength(3)
@@ -30,10 +31,17 @@ export class SignUpDto {
 
 export class SignInDto {
   @IsNotEmpty()
-  @IsEmail()
+  @MinLength(11)
+  @MaxLength(11)
   cpf!: string;
 
   @IsNotEmpty()
   @IsString()
   password!: string;
+}
+
+export class ResendEmailDto{
+  @IsNotEmpty()
+  @IsEmail()
+  email!: string
 }

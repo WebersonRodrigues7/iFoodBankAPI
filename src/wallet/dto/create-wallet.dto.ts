@@ -1,1 +1,8 @@
-export class CreateWalletDto {}
+import { isNotEmpty, IsNotEmpty, IsNumber } from "class-validator";
+
+export class CreateWalletDto {
+
+    @IsNumber()
+    @IsNotEmpty()
+    amount!: number
+}
