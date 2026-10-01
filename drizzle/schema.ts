@@ -28,3 +28,12 @@ export const transfersTable = sqliteTable("transfers_table", {
 	amount: integer(),
 });
 
+export const piggyTable = sqliteTable("piggy_table", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	name: text().notNull(),
+	amount: integer(),
+	ownerId: integer().notNull().references(() => usersTable.id),
+},
+(table) => [unique("piggy_table_ownerId_unique").on(table.ownerId),
+]);
+

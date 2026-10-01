@@ -1,34 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { PiggyService } from './piggy.service';
 import { CreatePiggyDto } from './dto/create-piggy.dto';
-import { UpdatePiggyDto } from './dto/update-piggy.dto';
+import { CurrentUser } from '@nestjs/authentication';
+import { type User } from 'src/db/schema';
 
 @Controller('piggy')
 export class PiggyController {
   constructor(private readonly piggyService: PiggyService) {}
 
   @Post()
-  create(@Body() createPiggyDto: CreatePiggyDto) {
-    return this.piggyService.create(createPiggyDto);
+  async create(@CurrentUser() user: User, @Body() body: CreatePiggyDto) {
+    await this.piggyService.createPiggy(body, user.id);
   }
 
-  @Get()
-  findAll() {
-    return this.piggyService.findAll();
+  @Post('/deposit')
+  async deposit(@Body() body: CreatePiggyDto, @CurrentUser() user: User) {
+    await this.piggyService.depositPiggy(body, user.id);
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.piggyService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePiggyDto: UpdatePiggyDto) {
-    return this.piggyService.update(+id, updatePiggyDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.piggyService.remove(+id);
+  @Delete()
+  async delete(@CurrentUser() user: User) {
+    await this.piggyService.deletePiggy(user.id);
   }
 }

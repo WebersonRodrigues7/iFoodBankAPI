@@ -10,5 +10,12 @@ export const relations = defineRelations(schema, (r) => ({
 	},
 	usersTable: {
 		walletTables: r.one.walletTable(),
+		piggyTables: r.one.piggyTable(),
+	},
+	piggyTable: {
+		usersTable: r.one.usersTable({
+			from: r.piggyTable.ownerId,
+			to: r.usersTable.id
+		}),
 	},
 }))

@@ -21,25 +21,48 @@ export const walletTable = sqliteTable('wallet_table', {
 });
 
 export const transfersTable = sqliteTable('transfers_table', {
-    id: int('id').primaryKey({ autoIncrement: true}),
-    payerId: int(),
-    payeeCpf: text().notNull(),
-    amount: int()
-})
+  id: int('id').primaryKey({ autoIncrement: true }),
+  payerId: int(),
+  payeeCpf: text().notNull(),
+  amount: int(),
+});
 
-export const relations = defineRelations({ usersTable, walletTable }, (r) => ({
-  walletTable: {
-    owner: r.one.usersTable({
-      from: r.walletTable.userId,
-      to: r.usersTable.id,
-    }),
-  },
-  usersTable: {
-    wallet: r.one.walletTable({
-      from: r.usersTable.id,
-      to: r.walletTable.userId,
-    }),
-  },
-}));
+export const piggyTable = sqliteTable('piggy_table', {
+  id: int('id').primaryKey({ autoIncrement: true }),
+  name: text().notNull(),
+  amount: int().notNull(),
+  ownerId: int()
+    .notNull()
+    .unique()
+    .references(() => usersTable.id),
+});
+
+export const relations = defineRelations(
+  { usersTable, walletTable, piggyTable },
+  (r) => ({
+    walletTable: {
+      owner: r.one.usersTable({
+        from: r.walletTable.userId,
+        to: r.usersTable.id,
+      }),
+    },
+    piggyTable: {
+      owner: r.one.usersTable({
+        from: r.piggyTable.ownerId,
+        to: r.usersTable.id,
+      }),
+    },
+    usersTable: {
+      wallet: r.one.walletTable({
+        from: r.usersTable.id,
+        to: r.walletTable.userId,
+      }),
+      piggy: r.one.piggyTable({
+        from: r.usersTable.id,
+        to: r.piggyTable.ownerId,
+      }),
+    },
+  }),
+);
 
 export type User = InferSelectModel<typeof usersTable>;
