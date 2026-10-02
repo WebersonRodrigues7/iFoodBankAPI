@@ -37,8 +37,7 @@ export class WalletService {
       .where(eq(walletTable.userId, userId));
 
     if (!findWallet) throw new NotFoundException();
-    console.log(amount);
-    console.log(findWallet.amount);
+
     const [updtWallet] = await this.db
       .update(walletTable)
       .set({
@@ -46,8 +45,6 @@ export class WalletService {
       })
       .where(eq(walletTable.userId, userId))
       .returning();
-
-    console.log(updtWallet);
 
     return updtWallet;
   }

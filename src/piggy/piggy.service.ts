@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreatePiggyDto } from './dto/create-piggy.dto';
+import { CreatePiggyDto, DepositPiggyDto } from './dto/piggy.dto';
 import { type Database } from 'src/db/database';
 import { piggyTable, usersTable, walletTable } from 'drizzle/schema';
 import { eq } from 'drizzle-orm';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class PiggyService {
@@ -65,15 +66,15 @@ export class PiggyService {
       return deletedPiggy;
     });
 
-    return deletedPiggy.id;
+    return deletedPiggy;
   }
 
-  async depositPiggy(body: CreatePiggyDto, userId: number) {
+  async depositPiggy(body: DepositPiggyDto, userId: number) {
     const findPiggy = await this.db.query.piggyTable.findFirst({
       where: { ownerId: userId },
     });
 
-    if (!findPiggy) return this.createPiggy(body, userId);
+    if (!findPiggy) throw new NotFoundException();
 
     const transaction = await this.db.transaction(async (tx) => {
       const findWallet = await tx.query.walletTable.findFirst({
@@ -87,12 +88,13 @@ export class PiggyService {
       if (!findWallet || !user) throw new NotFoundException();
 
       if (body.amount > findWallet.amount) throw new BadRequestException();
-      await tx
+      const piggynew = await tx
         .update(piggyTable)
         .set({
           amount: findPiggy.amount + body.amount,
         })
-        .where(eq(piggyTable.ownerId, userId));
+        .where(eq(piggyTable.ownerId, userId))
+        .returning();
 
       await tx
         .update(walletTable)
@@ -100,8 +102,64 @@ export class PiggyService {
           amount: findWallet.amount - body.amount,
         })
         .where(eq(walletTable.userId, userId));
+
+      return piggynew;
     });
 
     return transaction;
+  }
+
+  async withdrawPiggy(userId: number, body: DepositPiggyDto) {
+    await this.db.transaction(async (tx) => {
+      const findPiggy = await tx.query.piggyTable.findFirst({
+        where: { ownerId: userId },
+      });
+
+      const findUser = await tx.query.usersTable.findFirst({
+        where: { id: userId },
+      });
+
+      const findWallet = await tx.query.walletTable.findFirst({
+        where: { userId: userId },
+      });
+
+      if (!findPiggy || !findUser || !findWallet) throw new NotFoundException();
+      if (body.amount > findPiggy.amount) throw new BadRequestException();
+
+      await tx
+        .update(piggyTable)
+        .set({
+          amount: findPiggy.amount - body.amount,
+        })
+        .where(eq(piggyTable.ownerId, findUser.id));
+
+      await tx
+        .update(walletTable)
+        .set({
+          amount: findWallet.amount + body.amount,
+        })
+        .where(eq(walletTable.userId, findUser.id));
+    });
+  }
+
+  @Cron('0 0 * * * *')
+  async cdi() {
+    const findAllPiggy = await this.db.query.piggyTable.findMany();
+
+    await Promise.all(
+      findAllPiggy.map(async (item, i) => {
+        if (item.amount <= 0) return;
+
+        const newAmount = Number(item.amount + item.amount * 0.0005).toFixed(2);
+
+        await this.db
+          .update(piggyTable)
+          .set({
+            amount: Number(newAmount),
+          })
+          .where(eq(piggyTable.id, item.id))
+          .returning();
+      }),
+    );
   }
 }

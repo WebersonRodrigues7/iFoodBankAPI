@@ -7,11 +7,9 @@ import { CreateWalletDto } from './dto/create-wallet.dto';
 @Controller('wallet')
 export class WalletController {
   constructor(private readonly walletService: WalletService) {}
- 
+
   @Post('/deposit')
   async addAmount(@CurrentUser() user: User, @Body() body: CreateWalletDto) {
-    const depositInWallet = await this.walletService.deposit(user.id, body.amount);
-
-    return depositInWallet;
+    return await this.walletService.deposit(user.id, body.amount);
   }
 }

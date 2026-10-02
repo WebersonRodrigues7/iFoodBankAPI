@@ -8,8 +8,8 @@ export class UsersController {
 
   @Delete('/:id')
 
-  delete(@Param('id') id: number){
-    return this.usersService.deleteUser(id)
+  async delete(@Param('id') id: number){
+    return await this.usersService.deleteUser(id)
   }
 
 }

@@ -22,7 +22,7 @@ export const walletTable = sqliteTable('wallet_table', {
 
 export const transfersTable = sqliteTable('transfers_table', {
   id: int('id').primaryKey({ autoIncrement: true }),
-  payerId: int(),
+  payerId: int().references(() => usersTable.id),
   payeeCpf: text().notNull(),
   amount: int(),
 });
@@ -38,11 +38,17 @@ export const piggyTable = sqliteTable('piggy_table', {
 });
 
 export const relations = defineRelations(
-  { usersTable, walletTable, piggyTable },
+  { usersTable, walletTable, piggyTable, transfersTable },
   (r) => ({
     walletTable: {
       owner: r.one.usersTable({
         from: r.walletTable.userId,
+        to: r.usersTable.id,
+      }),
+    },
+    transfersTable: {
+      userTransfer: r.one.usersTable({
+        from: r.transfersTable.payerId,
         to: r.usersTable.id,
       }),
     },
@@ -60,6 +66,10 @@ export const relations = defineRelations(
       piggy: r.one.piggyTable({
         from: r.usersTable.id,
         to: r.piggyTable.ownerId,
+      }),
+      transfers: r.many.transfersTable({
+        from: r.usersTable.id,
+        to: r.transfersTable.payerId,
       }),
     },
   }),

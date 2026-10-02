@@ -9,3 +9,10 @@ export class CreatePiggyDto {
     @IsNumber()
     amount!: number
 }
+
+
+export class DepositPiggyDto {
+    @IsNotEmpty()
+    @IsNumber()
+    amount!: number
+}

@@ -12,14 +12,16 @@ import {
 } from '@nestjs/mail';
 import { AuthenticationModule } from '@nestjs/authentication';
 import { join } from 'node:path';
-import { ConfigModule } from "@nestjs/config"
+import { ConfigModule } from '@nestjs/config';
 import { WalletModule } from './wallet/wallet.module';
 import { TransfersModule } from './transfers/transfers.module';
 import { PiggyModule } from './piggy/piggy.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     MailModule.forRootAsync({
       useFactory: () => ({
         transport: process.env.SMTP_HOST
@@ -37,7 +39,7 @@ import { PiggyModule } from './piggy/piggy.module';
           absoluteTtl: '14d',
           idleTtl: '3d',
         },
-        emailVerification: { url: `${process.env.APP_URL}/auth/email/verify`}
+        emailVerification: { url: `${process.env.APP_URL}/auth/email/verify` },
       }),
     }),
     UsersModule,
